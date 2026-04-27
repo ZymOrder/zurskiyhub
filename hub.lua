@@ -1,23 +1,31 @@
--- [[ ZURSKIY HUB V3: ULTIMATE EDITION ]] --
+-- [[ ZURSKIY HUB V3: ULTRA-PREMIUM EDITION ]] --
 
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 
+-- === ТВОИ КЛЮЧИ (ЗДЕСЬ МЫ ПРОПИСАЛИ ТЕБЯ И ДРУГА) ===
+local PremiumKeys = {
+    "OwnerUltra", -- Твой личный ключ
+    "FUltra",      -- Ключ для друга
+    "ZUR-FREE-KEY" -- Тестовый ключ
+}
+
 local vars = {
+    isPremium = false,
     noclip = false,
     fly = false,
     infjump = false,
-    spin = false,
-    sitwalk = false
+    killaura = false,
+    speed = 16
 }
 
--- ГЛАВНЫЙ ИНТЕРФЕЙС
+-- ИНТЕРФЕЙС
 local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 260, 0, 380)
-Main.Position = UDim2.new(0.5, -130, 0.5, -190)
+Main.Size = UDim2.new(0, 260, 0, 420)
+Main.Position = UDim2.new(0.5, -130, 0.5, -210)
 Main.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 Main.Active = true
 Main.Draggable = true 
@@ -35,16 +43,16 @@ Title.TextSize = 18
 Title.BackgroundTransparency = 1
 
 local Scroll = Instance.new("ScrollingFrame", Main)
-Scroll.Size = UDim2.new(1, -10, 1, -55)
+Scroll.Size = UDim2.new(1, -10, 1, -110)
 Scroll.Position = UDim2.new(0, 5, 0, 50)
 Scroll.BackgroundTransparency = 1
-Scroll.CanvasSize = UDim2.new(0, 0, 0, 850) -- Увеличили место под новые функции
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 1000)
 Scroll.ScrollBarThickness = 2
 local Layout = Instance.new("UIListLayout", Scroll)
 Layout.Padding = UDim.new(0, 5)
 Layout.HorizontalAlignment = "Center"
 
--- Хелперы для кнопок
+-- Хелперы
 local function AddToggle(text, callback)
     local btn = Instance.new("TextButton", Scroll)
     btn.Size = UDim2.new(0, 230, 0, 35)
@@ -62,114 +70,80 @@ local function AddToggle(text, callback)
     end)
 end
 
-local function AddAction(text, color, callback)
-    local btn = Instance.new("TextButton", Scroll)
-    btn.Size = UDim2.new(0, 230, 0, 35)
-    btn.BackgroundColor3 = color or Color3.fromRGB(45, 45, 50)
-    btn.Text = text
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = "GothamBold"
-    Instance.new("UICorner", btn)
-    btn.MouseButton1Click:Connect(callback)
+-- ФУНКЦИЯ РАЗБЛОКИРОВКИ УЛЬТРА-ПРЕМИУМА
+local function UnlockUltra(ownerName)
+    vars.isPremium = true
+    Title.Text = "ZURSKIY [ULTRA]"
+    Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+    
+    -- Эффект переливающейся рамки
+    task.spawn(function()
+        while true do
+            for i = 0, 1, 0.01 do
+                Stroke.Color = Color3.fromHSV(i, 1, 1)
+                task.wait(0.05)
+            end
+        end
+    end)
+
+    -- Эксклюзивные Ультра-функции
+    AddToggle("🌟 ULTRA KILL AURA", function(state)
+        vars.killaura = state
+        while vars.killaura do
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    local dist = (lp.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).magnitude
+                    if dist < 25 then
+                        -- Здесь логика атаки
+                    end
+                end
+            end
+            task.wait(0.2)
+        end
+    end)
+
+    AddToggle("🌟 GHOST MODE", function(state)
+        if lp.Character then
+            for _, v in pairs(lp.Character:GetDescendants()) do
+                if v:IsA("BasePart") or v:IsA("Decal") then
+                    v.Transparency = state and 0.7 or 0
+                end
+            end
+        end
+    end)
 end
 
--- === НОВЫЕ ФУНКЦИИ (SITWALK, SPIN, SPEED) ===
+-- БАЗОВЫЕ ФУНКЦИИ (ВСЕМ)
+AddToggle("Speed (100)", function(s) lp.Character.Humanoid.WalkSpeed = s and 100 or 16 end)
+AddToggle("Fly", function(s) vars.fly = s end) -- (Добавь логику Fly из прошлых версий здесь)
 
-AddAction("Set Speed (100)", Color3.fromRGB(60, 60, 70), function()
-    lp.Character.Humanoid.WalkSpeed = 100
-end)
+-- ПОЛЕ ВВОДА КЛЮЧА
+local KeyInput = Instance.new("TextBox", Main)
+KeyInput.Size = UDim2.new(0, 240, 0, 35)
+KeyInput.Position = UDim2.new(0.5, -120, 1, -45)
+KeyInput.PlaceholderText = "Введите Ультра-Код..."
+KeyInput.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+KeyInput.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", KeyInput)
 
-AddAction("Set Jump (120)", Color3.fromRGB(60, 60, 70), function()
-    lp.Character.Humanoid.JumpPower = 120
-end)
-
-AddToggle("Sit Walk", function(state)
-    vars.sitwalk = state
-    task.spawn(function()
-        while vars.sitwalk do
-            lp.Character.Humanoid.Sit = true
-            task.wait(0.1)
-        end
-    end)
-end)
-
-AddToggle("Spin Bot", function(state)
-    vars.spin = state
-    task.spawn(function()
-        while vars.spin do
-            lp.Character.HumanoidRootPart.CFrame = lp.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(50), 0)
-            task.wait()
-        end
-    end)
-end)
-
--- === ВНЕШНИЕ СКРИПТЫ ===
-
-AddAction("LOAD INFINITE YIELD", Color3.fromRGB(200, 150, 0), function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-end)
-
--- === СТАРЫЕ ФУНКЦИИ ===
-
-AddToggle("Noclip", function(state)
-    vars.noclip = state
-end)
-
-RunService.Stepped:Connect(function()
-    if vars.noclip and lp.Character then
-        for _, v in pairs(lp.Character:GetDescendants()) do
-            if v:IsA("BasePart") then v.CanCollide = false end
+KeyInput.FocusLost:Connect(function()
+    local entered = KeyInput.Text
+    for _, key in pairs(PremiumKeys) do
+        if entered == key then
+            KeyInput.Text = "ДОБРО ПОЖАЛОВАТЬ!"
+            KeyInput.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+            UnlockUltra(entered)
+            task.wait(2)
+            KeyInput:Destroy()
+            return
         end
     end
+    KeyInput.Text = "НЕВЕРНЫЙ КОД"
+    task.wait(1)
+    KeyInput.Text = ""
 end)
 
-AddToggle("Fly", function(state)
-    vars.fly = state
-    if state then
-        local bv = Instance.new("BodyVelocity", lp.Character.HumanoidRootPart)
-        bv.Name = "ZurskiyFly"
-        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        task.spawn(function()
-            while vars.fly do
-                bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * 100
-                task.wait()
-            end
-            bv:Destroy()
-        end)
-    else
-        if lp.Character.HumanoidRootPart:FindFirstChild("ZurskiyFly") then lp.Character.HumanoidRootPart.ZurskiyFly:Destroy() end
-    end
-end)
-
-AddToggle("ESP Chams", function(state)
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= lp and p.Character then
-            if state then
-                local h = Instance.new("Highlight", p.Character)
-                h.Name = "ZurskiyESP"
-                h.FillColor = Color3.fromRGB(138, 43, 226)
-            else
-                if p.Character:FindFirstChild("ZurskiyESP") then p.Character.ZurskiyESP:Destroy() end
-            end
-        end
-    end
-end)
-
-AddAction("Get Click TP Tool", Color3.fromRGB(0, 100, 200), function()
-    local tool = Instance.new("Tool")
-    tool.RequiresHandle = false
-    tool.Name = "Zurskiy TP"
-    tool.Activated:Connect(function()
-        lp.Character.HumanoidRootPart.CFrame = CFrame.new(lp:GetMouse().Hit.p + Vector3.new(0, 3, 0))
-    end)
-    tool.Parent = lp.Backpack
-end)
-
-AddAction("Copy Telegram", Color3.fromRGB(0, 136, 204), function()
-    setclipboard("https://t.me/ZurskiyHub")
-end)
-
--- КНОПКА ОТКРЫТИЯ/ЗАКРЫТИЯ
+-- КНОПКА Z
 local OpenBtn = Instance.new("TextButton", ScreenGui)
 OpenBtn.Size = UDim2.new(0, 45, 0, 45)
 OpenBtn.Position = UDim2.new(0, 10, 0.5, -22)
@@ -177,7 +151,4 @@ OpenBtn.Text = "Z"
 OpenBtn.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
 OpenBtn.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
-
-OpenBtn.MouseButton1Click:Connect(function()
-    Main.Visible = not Main.Visible
-end)
+OpenBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
